@@ -44,7 +44,6 @@ class Reader:
         self.number_sample_per_shard = number_sample_per_shard
         self.done_shards = done_shards
         self.filters = [('WIDTH', '>=', 256), ('HEIGHT', '>=', 256)]
-        self.filters_high_res = [('WIDTH', '>=', 1024), ('HEIGHT', '>=', 1024)]
         self.hr_path = hr_path
 
         fs, url_path = fsspec.core.url_to_fs(url_list)
