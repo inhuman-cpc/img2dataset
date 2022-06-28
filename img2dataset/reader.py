@@ -6,6 +6,7 @@ import fsspec
 import time
 import pyarrow.parquet as pq
 import pyarrow.csv as csv_pq
+import pyarrow.compute as pc
 import pyarrow as pa
 import pandas as pd
 
@@ -94,7 +95,13 @@ class Reader:
                     columns_to_read += self.save_additional_columns
                 df = pq.read_table(file, columns=columns_to_read, filters=self.filters)
                 # mark high resolution records and save them into a csv file
-                df_high_res = pq.read_table(file, columns=columns_to_read, filters=self.filters_high_res)
+                df_high_res = pc.filter(
+                    df,
+                    pc.and_(
+                        pc.greater_equal(df['WIDTH'], 1024),
+                        pc.greater_equal(df['HEIGHT'], 1024),
+                    )
+                )
                 if df_high_res.num_rows > 0:
                     # 128 for testing, default 1024
                     write_options = csv_pq.WriteOptions(include_header=False, delimiter=",", batch_size=128)
@@ -161,6 +168,7 @@ class Reader:
         shards.sort(key=lambda k: k[0])
 
         del df
+        del df_high_res
 
         return shards, number_shards
 
