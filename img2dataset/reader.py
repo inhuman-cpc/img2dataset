@@ -41,6 +41,7 @@ class Reader:
         self.save_additional_columns = save_additional_columns
         self.number_sample_per_shard = number_sample_per_shard
         self.done_shards = done_shards
+        self.filters = [('width', '>=', 256), ('height', '>=', 256)]
 
         fs, url_path = fsspec.core.url_to_fs(url_list)
         self.fs = fs
@@ -88,7 +89,7 @@ class Reader:
                     columns_to_read += [self.caption_col]
                 if self.save_additional_columns is not None:
                     columns_to_read += self.save_additional_columns
-                df = pq.read_table(file, columns=columns_to_read)
+                df = pq.read_table(file, columns=columns_to_read, filters=self.filters)
         else:
             raise ValueError(f"Unknown input format {self.input_format}")
 
