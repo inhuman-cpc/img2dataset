@@ -144,29 +144,30 @@ class Resizer:
 
                 # No resizing for high resolution images
                 is_high_res = original_width >= self.high_resolution and original_height >= self.high_resolution
-                if not is_high_res:
-                    # resizing in following conditions
-                    if self.resize_mode in (ResizeMode.keep_ratio, ResizeMode.center_crop):
-                        downscale = min(original_width, original_height) > self.image_size
-                        if not self.resize_only_if_bigger or downscale:
-                            interpolation = self.downscale_interpolation if downscale else self.upscale_interpolation
-                            img = A.smallest_max_size(img, self.image_size, interpolation=interpolation)
-                            if self.resize_mode == ResizeMode.center_crop:
-                                img = A.center_crop(img, self.image_size, self.image_size)
-                            encode_needed = True
-                    elif self.resize_mode == ResizeMode.border:
-                        downscale = max(original_width, original_height) > self.image_size
-                        if not self.resize_only_if_bigger or downscale:
-                            interpolation = self.downscale_interpolation if downscale else self.upscale_interpolation
-                            img = A.longest_max_size(img, self.image_size, interpolation=interpolation)
-                            img = A.pad(
-                                img,
-                                self.image_size,
-                                self.image_size,
-                                border_mode=cv2.BORDER_CONSTANT,
-                                value=[255, 255, 255],
-                            )
-                            encode_needed = True
+                if is_high_res:
+                    pass
+                # resizing in following conditions
+                elif self.resize_mode in (ResizeMode.keep_ratio, ResizeMode.center_crop):
+                    downscale = min(original_width, original_height) > self.image_size
+                    if not self.resize_only_if_bigger or downscale:
+                        interpolation = self.downscale_interpolation if downscale else self.upscale_interpolation
+                        img = A.smallest_max_size(img, self.image_size, interpolation=interpolation)
+                        if self.resize_mode == ResizeMode.center_crop:
+                            img = A.center_crop(img, self.image_size, self.image_size)
+                        encode_needed = True
+                elif self.resize_mode == ResizeMode.border:
+                    downscale = max(original_width, original_height) > self.image_size
+                    if not self.resize_only_if_bigger or downscale:
+                        interpolation = self.downscale_interpolation if downscale else self.upscale_interpolation
+                        img = A.longest_max_size(img, self.image_size, interpolation=interpolation)
+                        img = A.pad(
+                            img,
+                            self.image_size,
+                            self.image_size,
+                            border_mode=cv2.BORDER_CONSTANT,
+                            value=[255, 255, 255],
+                        )
+                        encode_needed = True
                 height, width = img.shape[:2]
                 if encode_needed:
                     img_str = cv2.imencode(f".{self.encode_format}", img, params=self.encode_params)[1].tobytes()
