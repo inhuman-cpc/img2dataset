@@ -27,6 +27,7 @@ def download(
     url_list: str,
     image_size: int = 256,
     output_folder: str = "images",
+    output_folder_high_resolution: str = "high_resolution",
     processes_count: int = 1,
     resize_mode: str = "border",
     resize_only_if_bigger: bool = False,
@@ -66,6 +67,7 @@ def download(
 
     output_folder = make_path_absolute(output_folder)
     url_list = make_path_absolute(url_list)
+    high_res_folder = make_path_absolute(output_folder_high_resolution)
 
     logger_process = LoggerProcess(output_folder, enable_wandb, wandb_project, config_parameters)
 
@@ -113,6 +115,7 @@ def download(
         number_sample_per_shard,
         done_shards,
         tmp_path,
+        hr_path=high_res_folder
     )
 
     if output_format == "webdataset":
