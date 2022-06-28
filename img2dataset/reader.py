@@ -102,8 +102,7 @@ class Reader:
                     )
                 )
                 if df_high_res.num_rows > 0:
-                    # 128 for testing, default 1024
-                    write_options = csv_pq.WriteOptions(include_header=False, delimiter=",", batch_size=128)
+                    write_options = csv_pq.WriteOptions(include_header=False)
                     csv_pq.write_csv(df_high_res, f"{self.hr_path}/{start_shard_id}.csv", write_options=write_options)
                     
         else:
