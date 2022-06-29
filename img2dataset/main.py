@@ -113,6 +113,7 @@ def download(
         number_sample_per_shard,
         done_shards,
         tmp_path,
+        filters=[('WIDTH', '>=', 256), ('HEIGHT', '>=', 256)]
     )
 
     if output_format == "webdataset":

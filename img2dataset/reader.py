@@ -34,6 +34,7 @@ class Reader:
         number_sample_per_shard,
         done_shards,
         tmp_path,
+        filters,
     ) -> None:
         self.input_format = input_format
         self.url_col = url_col
@@ -41,7 +42,7 @@ class Reader:
         self.save_additional_columns = save_additional_columns
         self.number_sample_per_shard = number_sample_per_shard
         self.done_shards = done_shards
-        self.filters = [('WIDTH', '>=', 256), ('HEIGHT', '>=', 256)]
+        self.filters = filters
 
         fs, url_path = fsspec.core.url_to_fs(url_list)
         self.fs = fs
