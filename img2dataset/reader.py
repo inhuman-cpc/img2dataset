@@ -6,7 +6,6 @@ import fsspec
 import time
 import pyarrow.parquet as pq
 import pyarrow.csv as csv_pq
-import pyarrow.compute as pc
 import pyarrow as pa
 import pandas as pd
 
@@ -35,7 +34,6 @@ class Reader:
         number_sample_per_shard,
         done_shards,
         tmp_path,
-        hr_path,
     ) -> None:
         self.input_format = input_format
         self.url_col = url_col
@@ -44,7 +42,6 @@ class Reader:
         self.number_sample_per_shard = number_sample_per_shard
         self.done_shards = done_shards
         self.filters = [('WIDTH', '>=', 256), ('HEIGHT', '>=', 256)]
-        self.hr_path = hr_path
 
         fs, url_path = fsspec.core.url_to_fs(url_list)
         self.fs = fs
@@ -93,18 +90,6 @@ class Reader:
                 if self.save_additional_columns is not None:
                     columns_to_read += self.save_additional_columns
                 df = pq.read_table(file, columns=columns_to_read, filters=self.filters)
-                # mark high resolution records and save them into a csv file
-                df_high_res = pc.filter(
-                    df,
-                    pc.and_(
-                        pc.greater_equal(df['WIDTH'], 1024),
-                        pc.greater_equal(df['HEIGHT'], 1024),
-                    )
-                )
-                if df_high_res.num_rows > 0:
-                    write_options = csv_pq.WriteOptions(include_header=False)
-                    csv_pq.write_csv(df_high_res, f"{self.hr_path}/{start_shard_id}.csv", write_options=write_options)
-                    
         else:
             raise ValueError(f"Unknown input format {self.input_format}")
 
@@ -166,7 +151,6 @@ class Reader:
         shards.sort(key=lambda k: k[0])
 
         del df
-        del df_high_res
 
         return shards, number_shards
 
