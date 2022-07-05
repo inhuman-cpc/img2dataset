@@ -59,25 +59,27 @@ def main(folder_list, output_file):
 
     log_file = open(log_path, 'w')
 
-    for folder in folder_list:
-        fs, url_path = fsspec.core.url_to_fs(folder)
-        if not fs.exists(url_path):
-            print(f"Folder path not exists: {url_path}")
-            continue
+    with ThreadPool(32) as thread_pool:
+        for folder in folder_list:
+            fs, url_path = fsspec.core.url_to_fs(folder)
+            if not fs.exists(url_path):
+                print(f"Folder path not exists: {url_path}")
+                continue
 
-        base_path = url_path + '/..'
-        tars = fs.glob(url_path + '/*.tar')
-        dirs = list(map(lambda x: x.replace('.tar', ''),  tars))
-        print(f"Found {len(dirs)} tar files in {url_path}, processing now ...")
-        start = datetime.now()
-        with ThreadPool(32) as thread_pool:
+            base_path = url_path + '/..'
+            tars = fs.glob(url_path + '/*.tar')
+            dirs = list(map(lambda x: x.replace('.tar', ''),  tars))
+            print(
+                f"Found {len(dirs)} tar files in {url_path}, processing now ...")
+
+            start = datetime.now()
             for tar_dir, records in thread_pool.imap_unordered(search_dir, dirs):
                 if len(records) == 0:
                     continue
 
                 log_file.write('\n'.join(
                     list(map(lambda x: get_relative_path(tar_dir, x, base_path), records))) + '\n')
-        print(f"Elapsed time: {datetime.now() - start}")
+            print(f"Elapsed time: {datetime.now() - start}")
 
     log_file.close()
 
