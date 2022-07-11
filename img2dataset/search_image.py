@@ -23,6 +23,8 @@ import os
 import fsspec
 import json
 from datetime import datetime
+import fire
+from typing import List
 
 size = 1024
 
@@ -50,7 +52,7 @@ def search_dir(tar_dir):
     return (tar_dir, records)
 
 
-def main(folder_list, output_file):
+def search_nodes(folder_list: List, output_file: str = "out.txt"):
     fs, log_path = fsspec.core.url_to_fs(output_file)
     if fs.exists(log_path):
         print(
@@ -84,5 +86,9 @@ def main(folder_list, output_file):
     log_file.close()
 
 
-node_list = ['../node1', '../node2', '../node3']
-main(node_list, '../1026.txt')
+def main():
+    fire.Fire(search_nodes)
+
+
+if __name__ == "__main__":
+    main()
